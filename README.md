@@ -6,8 +6,6 @@ This repository provides a reusable command-line tool and Python API for solving
 # Teammates
 
 # NP-Hard Problem Solver Pipeline
-
-This repository provides a reusable command-line tool and Python API for solving NP-hard problems using **pysmt** as a backend.
 The pipeline is structured in four clear, modular stages:
 
 1. **Parsing Input**
