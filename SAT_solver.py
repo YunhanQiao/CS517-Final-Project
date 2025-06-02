@@ -36,6 +36,42 @@ def build_vc_formula(n, edges, k):
     return formula, xs
 
 
+def parse_cnf(path):
+    """
+    Returns (num_vars, clauses)
+      num_vars: int
+      clauses: List[List[int]]
+    """
+    clauses = []
+    num_vars = 0
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('c') or line == '':
+                continue
+            if line.startswith('p'):
+                parts = line.split()
+                num_vars = int(parts[2])
+                continue
+            if line == '0' or line == '%':
+                continue
+            clause = [int(x) for x in line.split() if x != '0']
+            if clause:
+                clauses.append(clause)
+    return num_vars, clauses
+
+def build_cnf_formula(num_vars, clauses):
+    # Create Boolean symbols x1...xn
+    xs = {i: Symbol(f"x{i}", BOOL) for i in range(1, num_vars+1)}
+    # Each clause is an Or of literals
+    def lit(l):
+        v = abs(l)
+        return xs[v] if l > 0 else ~xs[v]
+    clause_exprs = [Or([lit(l) for l in clause]) for clause in clauses]
+    formula = And(clause_exprs)
+    return formula, xs
+
+
 def solve_formula(formula, xs, backend="z3", timeout=None):
     # Initialize the solver without passing timeout
     with Solver(name=backend) as solver:
@@ -67,12 +103,18 @@ def output_vc_result(sat, assignment, out_path=None):
 def main():
     # 1. CLI argument parsing
     parser = argparse.ArgumentParser(
-        description="Vertex Cover Solver using pysmt"
+        description="SAT/Vertex Cover Solver using pysmt"
     )
     parser.add_argument(
         "-i", "--input",
         required=True,
-        help="Path to the instance file (edge list + k)"
+        help="Path to the instance file"
+    )
+    parser.add_argument(
+        "-p", "--problem",
+        choices=["vc", "cnf"],
+        required=True,
+        help="Problem type: 'vc' for Vertex Cover, 'cnf' for DIMACS CNF"
     )
     parser.add_argument(
         "-b", "--backend",
@@ -92,13 +134,15 @@ def main():
     )
     args = parser.parse_args()
 
-    # 2. Parse the input format
-    n, edges, k = parse_vc(args.input)
+    if args.problem == "vc":
+        n, edges, k = parse_vc(args.input)
+        formula, xs = build_vc_formula(n, edges, k)
+    elif args.problem == "cnf":
+        num_vars, clauses = parse_cnf(args.input)
+        formula, xs = build_cnf_formula(num_vars, clauses)
+    else:
+        raise ValueError("Unknown problem type")
 
-    # 3. Build the pysmt formula + symbol map
-    formula, xs = build_vc_formula(n, edges, k)
-
-    # 4. Solve and extract a model
     sat, assignment = solve_formula(
         formula,
         xs,
@@ -106,7 +150,6 @@ def main():
         timeout=args.timeout
     )
 
-    # 5. Output the result
     output_vc_result(sat, assignment, out_path=args.output)
 
 
