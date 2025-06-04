@@ -9,6 +9,6 @@ echo "Running Optimization_solver.py on all input files:"
 for f in "$INPUT_DIR"/*; do
     if [[ -f "$f" ]]; then
         echo "Solving $f"
-        /usr/bin/time -f "Time: %E" python "$SOLVER" -i "$f"
+        time -f "Time: %E" python "$SOLVER" -i "$f"
     fi
 done
