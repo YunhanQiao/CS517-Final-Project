@@ -42,7 +42,7 @@ parser.add_argument(
 parser.add_argument(
     "--temperature",
     type=float,
-    default=0.0,
+    default=0.5,
     help="Temperature for GPT sampling (default: 0.0 for deterministic output)"
 )
 args = parser.parse_args()
@@ -76,7 +76,7 @@ def build_messages(cnf_text: str) -> list[dict]:
         "role": "system",
         "content": (
             "You are an expert in 3-SAT problem. "
-            "Follow the pattern in the provided example to solve the new problem step-by-step, showing all reasoning. Provide the final answer in a clear format (e.g., YES/NO for decision problems, a numerical value and solution set for optimization problems). After the final answer, include a line: "
+            "Follow the pattern in the provided example to solve the new problem step-by-step, showing all reasoning. Provide the final answer in a clear format, including YES/NO for decision problems, a numerical value and solution set for optimization problems. After the final answer, include a line: "
             "Confidence: XX%"
             "where XX% is your estimate of how confident you are that the answer is correct. "
             "Example: [Input:"
@@ -148,14 +148,9 @@ def main():
         print(f"ERROR: GPT API call failed: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Write GPT’s raw response to <basename>_gpt_output.txt
-    output_path = cnf_path.with_name(f"{cnf_name}_gpt_output.txt")
-    try:
-        output_path.write_text(gpt_output, encoding="utf-8")
-        print(f"✔ GPT output saved to {output_path}")
-    except Exception as e:
-        print(f"ERROR: Could not write to {output_path}: {e}", file=sys.stderr)
-        sys.exit(1)
+    # Print GPT’s raw response to stdout
+    print("===== GPT Response =====")
+    print(gpt_output)
 
 if __name__ == "__main__":
     main()
