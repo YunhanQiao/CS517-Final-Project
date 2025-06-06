@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Directory containing input .cnf files
-INPUT_DIR="/workspaces/CS517-Final-Project/3_SAT_satisifiable"
-OUTPUT_DIR="/workspaces/CS517-Final-Project/result/GPT/sat"
+INPUT_DIR="/workspaces/CS517-Final-Project/3_SAT_unsatisfiable"
+OUTPUT_DIR="/workspaces/CS517-Final-Project/result/GPT/unsat"
 
 # Make sure output directory exists
 mkdir -p "$OUTPUT_DIR"
